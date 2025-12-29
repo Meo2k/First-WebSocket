@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h2>Socket.io Example</h2>
+    <div id="announcement"></div>
+    <div id="chat-box" style="border: 1px solid #ccc; height: 200px; overflow-y: scroll; margin-bottom: 10px; padding: 10px;">
+        <ul id="messages" style="list-style: none; padding: 0;"></ul>
+    </div>
+
+    <input type="text" id="messageInput" placeholder="Nhập tin nhắn...">
+    <button onclick="sendMessage()">Gửi</button>
+
+    <script src="http://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io("http://14.225.44.169:3000");
+        const name = prompt("Tên của bạn là gì?") || "Guest";
+
+        function sendMessage(){
+            const inputMessage = document.getElementById("messageInput")
+            const message = inputMessage.value; 
+            if (message){
+                socket.emit("send-message", {
+                    username: name, 
+                    message
+                })
+            }
+            const li = document.createElement("li");
+
+            li.innerHTML = `<strong>Bạn:</strong> ${message}`;
+            document.getElementById("messages").appendChild(li);
+            
+            const chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        socket.on("connect", () => {
+            console.log("Connected to server");
+            console.log("My socket ID: ", socket.id);
+        })
+
+        socket.on("welcome", (msg) => {
+            console.log(msg);
+            document.getElementById("announcement").innerText = msg;
+        })
+
+        socket.on("receive-message", ({username, message})=>{
+            const li = document.createElement("li");
+
+            li.innerHTML = `<strong>${username}:</strong> ${message}`;
+            document.getElementById("messages").appendChild(li);
+            
+            const chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+
+    </script>
+
+</body>
+
+</html>
